@@ -1,0 +1,4 @@
+# _turn-sound bundle mount: 新增一个 profile 条目，必须用 insert。
+- insert:
+    - id: _turn-sound
+      name: _turn-sound

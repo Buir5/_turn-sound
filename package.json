@@ -1,0 +1,47 @@
+{
+  "name": "_turn-sound",
+  "version": "0.3.0",
+  "description": "回合结束提示音 + 可拖动额度浮层（含人民币扣费/余额对比）",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./client/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "client",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "notification",
+    "sound"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Buir5/_turn-sound.git"
+  },
+  "homepage": "https://github.com/Buir5/_turn-sound#readme",
+  "author": "知乎老哥 (https://www.zhihu.com/people/svip3)"
+}
