@@ -7,7 +7,7 @@ window.__ModuleLoader__.load({
 var BASE = '/_turn-sound'
 var ROOT = 'ts-root'
 var TOAST = 'ts-toast'
-var VER = '0.3.0'
+var VER = '0.3.1'
 var REPO = 'Buir5/_turn-sound'
 var st = {
   cfg: { enabled: true, volume: 0.7, sound: '', opacity: 0.9, x: null, y: null },
@@ -26,7 +26,7 @@ var CSS = [
   '#' + ROOT + ' .act{flex:1;padding:7px 0;border-radius:7px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#e7edf6;cursor:pointer;font-size:12px}',
   '#' + ROOT + ' .act:hover{background:rgba(255,255,255,.16)}',
   '#' + ROOT + ' .tip{margin-top:9px;font-size:11px;color:#8f9bb0;word-break:break-all}',
-  '#' + TOAST + '{position:fixed;left:18px;top:18px;z-index:2147483001;min-width:118px;max-width:172px;padding:7px 9px;border-radius:10px;border:1px solid rgba(255,255,255,.18);color:#ffe6ae;font:11px/1.5 ui-monospace,Consolas,monospace;opacity:0;transform:translateY(-6px);transition:opacity .32s,transform .32s,visibility 0s .32s;cursor:move;visibility:hidden;pointer-events:none;user-select:none;',
+  '#' + TOAST + '{position:fixed;left:18px;top:18px;z-index:2147483001;min-width:170px;max-width:260px;padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.18);color:#ffe6ae;font:13.5px/1.6 ui-monospace,Consolas,monospace;opacity:0;transform:translateY(-6px);transition:opacity .32s,transform .32s,visibility 0s .32s;cursor:move;visibility:hidden;pointer-events:none;user-select:none;',
   '#' + TOAST + '.show{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition:opacity .32s,transform .32s,visibility 0s 0s}',
   '#' + ROOT + ' .bell.upd::after{content:"";position:absolute;margin:-2px 0 0 30px;width:9px;height:9px;border-radius:50%;background:#ff5a4d;box-shadow:0 0 6px #ff5a4d}',
   '#' + ROOT + ' .vrow{margin-top:8px;font-size:11px;color:#7f8b9e}',
@@ -34,6 +34,9 @@ var CSS = [
   '#' + ROOT + ' .vrow a:hover{text-decoration:underline}',
   '#' + ROOT + ' .vnew{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;background:#e0a23c;color:#1b1206;font-weight:700}',
 ].join('')
+function hex(v, d) {
+  return /^#[0-9a-fA-F]{6}$/.test(String(v || '')) ? String(v) : d
+}
 function money(v) { return '¥' + (Number(v) || 0).toFixed(4) }
 function toks(v) {
   var n = Number(v) || 0
@@ -128,15 +131,58 @@ function showToast(w) {
   var el = toastEl()
   var cost = Number(w.cost) || 0
   var bal = (w.balance === null || w.balance === undefined) ? null : Number(w.balance)
+  var note = w.note ? String(w.note) : ''
   var rows = []
-  rows.push('<div>扣费  <b style="color:#ff8f6b">-¥' + cost.toFixed(4) + '</b></div>')
-  rows.push('<div>余额  <b style="color:#7ee0a6">' + (bal === null || !isFinite(bal) ? "—" : "¥" + bal.toFixed(2)) + '</b></div>')
+  rows.push('<div>扣费  <b style="color:' + hex(st.cfg.costColor, '#ff2d3f') + ';font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.75)">-¥' + cost.toFixed(4) + '</b></div>')
+  rows.push('<div>余额  <b style="color:' + hex(st.cfg.balColor, '#00ffb3') + ';font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.75)">' + (bal === null || !isFinite(bal) ? '—' : '¥' + bal.toFixed(2)) + '</b></div>')
+  if (note) rows.push('<div style="color:#8f9bb0;font-size:11.5px;margin-top:3px">' + note + '</div>')
   el.innerHTML = rows.join('')
-  look(el)
-  el.classList.add('show')
+  el.style.cssText = [
+    'position:fixed',
+    'z-index:2147483001',
+    'min-width:170px',
+    'max-width:260px',
+    'padding:11px 13px',
+    'border-radius:12px',
+    'border:1px solid rgba(255,255,255,.18)',
+    'color:#ffe6ae',
+    'font:13.5px/1.6 ui-monospace,Consolas,monospace',
+    'background:rgba(16,20,28,' + (isFinite(Number(st.cfg.opacity)) ? Number(st.cfg.opacity).toFixed(2) : '0.9') + ')',
+    'box-shadow:0 8px 26px rgba(0,0,0,.45)',
+    'cursor:move',
+    'user-select:none',
+    'pointer-events:auto',
+    'opacity:1',
+    'transform:none',
+    'visibility:visible'
+  ].join(';')
+  applyPos(el)
+  clampIn(el)
   clearTimeout(st.hideTimer)
-  st.hideTimer = setTimeout(function () { el.classList.remove('show') }, 10000)
+  st.hideTimer = setTimeout(function () {
+    el.style.opacity = '0'
+    el.style.visibility = 'hidden'
+  }, 10000)
 }
+
+function clampIn(el) {
+  var r = el.getBoundingClientRect()
+  var w = window.innerWidth || 1200
+  var h = window.innerHeight || 800
+  var l = r.left, t = r.top
+  if (!isFinite(l) || !isFinite(t) || l < 0 || t < 0 || l > w - 60 || t > h - 40) {
+    l = 18; t = 18
+  }
+  l = Math.max(2, Math.min(l, w - r.width - 4))
+  t = Math.max(2, Math.min(t, h - r.height - 4))
+  el.style.left = Math.round(l) + 'px'
+  el.style.top = Math.round(t) + 'px'
+  el.style.right = 'auto'
+  writePos(l, t)
+  st.cfg.x = Math.round(l)
+  st.cfg.y = Math.round(t)
+}
+
 function api(path, opt) {
   return fetch(BASE + path, opt).then(function (r) { return r.json() })
 }
@@ -150,6 +196,8 @@ function save(quiet) {
     sound: so ? so.value : st.cfg.sound,
     volume: vo ? Number(vo.value) : st.cfg.volume,
     opacity: op ? Number(op.value) : st.cfg.opacity,
+    costColor: (document.getElementById('ts-cost') || {}).value || st.cfg.costColor,
+    balColor: (document.getElementById('ts-bal') || {}).value || st.cfg.balColor,
     x: st.cfg.x,
     y: st.cfg.y
   }
@@ -180,6 +228,12 @@ function syncUI() {
     so.innerHTML = html
     so.value = st.cfg.sound || ''
   }
+  ;(function () {
+    var c = document.getElementById('ts-cost')
+    var b = document.getElementById('ts-bal')
+    if (c) c.value = hex(st.cfg.costColor, '#ff2d3f')
+    if (b) b.value = hex(st.cfg.balColor, '#00ffb3')
+  })()
   if (tip) tip.textContent = '目录 ' + (st.dir || '?') + ' ｜ 当前 ' + (st.cfg.sound || '内置 ding')
 }
 function refresh() {
@@ -225,12 +279,12 @@ function checkUpdate() {
       .then(function (j) {
         var ver = document.getElementById('ts-ver')
         var rel = 'https://github.com/' + REPO + '/releases'
-        if (ver) ver.innerHTML = 'v' + VER + ' · <a href="' + rel + '" target=_blank rel="noopener noreferrer">更新日志</a>'
+        if (ver) ver.innerHTML = '<a href="' + rel + '" target=_blank rel="noopener noreferrer" style="color:#ffb300;font-weight:700;text-decoration:none">更新日志/点我更新</a>'
         if (!j || !j.version) return
         if (vcmp(j.version, VER) > 0) {
           var bell = document.getElementById('ts-bell')
           if (bell) { bell.classList.add('upd'); bell.title = '有新版本 v' + j.version + '（当前 v' + VER + '）点开可看说明' }
-          if (ver) ver.innerHTML = 'v' + VER + ' → <span class=vnew>v' + j.version + '</span> · <a href="' + (j.url || rel) + '" target=_blank rel="noopener noreferrer">去更新</a>'
+          if (ver) ver.innerHTML = '<a href="' + rel + '" target=_blank rel="noopener noreferrer" style="color:#ffb300;font-weight:700;text-decoration:none">更新日志/点我更新</a> <span class=vnew>v' + j.version + '</span> · <a href="' + (j.url || rel) + '" target=_blank rel="noopener noreferrer">去更新</a>'
         }
       })
       .catch(function () {})
@@ -247,10 +301,12 @@ function build() {
     '<div class=row><span>声音</span><select id=ts-sound></select></div>',
     '<div class=row><span>音量</span><input type=range id=ts-vol min=0 max=1 step=0.05></div>',
     '<div class=row><span>浮层不透明</span><input type=range id=ts-op min=0 max=1 step=0.05></div>',
+    '<div class=row><span>扣费颜色</span><input type=color id=ts-cost value="#ff2d3f" style="width:52px;height:26px;padding:0;border:1px solid rgba(255,255,255,.2);background:none;border-radius:6px;cursor:pointer"></div>',
+    '<div class=row><span>余额颜色</span><input type=color id=ts-bal value="#00ffb3" style="width:52px;height:26px;padding:0;border:1px solid rgba(255,255,255,.2);background:none;border-radius:6px;cursor:pointer"></div>',
     '<div class=row><span>音频文件</span><button class=act id=ts-pick>选择 MP3/WAV</button></div>',
     '<div class=acts><button class=act id=ts-test>试听</button><button class=act id=ts-save>保存</button><button class=act id=ts-show>测浮层</button></div>',
     '<div class=tip id=ts-tip></div>',
-    '<div class=vrow id=ts-ver>v' + VER + '</div>',
+    '<div class=vrow id=ts-ver style="color:#ffb300;font-weight:700;font-size:13px;letter-spacing:.2px">v' + VER + ' 更新日志/点我更新</div>',
     '<input type=file id=ts-file accept=audio/* style=display:none>',
     '</div>',
     '<button class=bell id=ts-bell title=回合结束提示音>🔔</button>'
@@ -262,15 +318,29 @@ function build() {
   root.querySelector('#ts-test').addEventListener('click', play)
   root.querySelector('#ts-save').addEventListener('click', function () { save(false) })
   root.querySelector('#ts-show').addEventListener('click', function () {
+    var tip = document.getElementById('ts-tip')
+    showToast({ cost: 0, balance: null, note: '读取中…' })
+    try { play() } catch (e) {}
     api('/usage').then(function (j) {
       var d = payload(j)
-      play()
       showToast(d)
-      var tip = document.getElementById('ts-tip')
       if (tip) tip.textContent = '浮层测试 · 本轮 ' + money(d.cost) + ' · ' + toks(d.tokens) + ' tokens · 今日 ' + money(d.today)
-    }).catch(function () {})
+    }).catch(function (err) {
+      showToast({ cost: 0, balance: null, note: '接口失败 ' + String((err && err.message) || err) })
+      if (tip) tip.textContent = '接口失败：' + String((err && err.message) || err)
+    })
   })
   root.querySelector('#ts-en').addEventListener('change', function () { save(true) })
+  ;['ts-cost', 'ts-bal'].forEach(function (id) {
+    var el = root.querySelector('#' + id)
+    if (!el) return
+    el.addEventListener('input', function () {
+      if (id === 'ts-cost') st.cfg.costColor = el.value
+      else st.cfg.balColor = el.value
+      showToast({ cost: 0.0123, balance: 20, note: '颜色预览（松开后自动保存）' })
+    })
+    el.addEventListener('change', function () { save(true) })
+  })
   root.querySelector('#ts-sound').addEventListener('change', function () { save(false) })
   root.querySelector('#ts-vol').addEventListener('change', function () { save(true) })
   root.querySelector('#ts-op').addEventListener('change', function () { save(true) })

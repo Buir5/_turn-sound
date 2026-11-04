@@ -1,6 +1,6 @@
 {
   "name": "_turn-sound",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "回合结束提示音 + 可拖动额度浮层（含人民币扣费/余额对比）",
   "type": "module",
   "main": "lib/index.js",

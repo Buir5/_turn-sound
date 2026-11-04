@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
-  "url": "https://github.com/Buir5/_turn-sound/releases/latest",
-  "notes": "turn-end chime + quota overlay with CNY cost and balance; bilingual README; update check"
+  "version": "0.3.1",
+  "url": "https://github.com/Buir5/_turn-sound/releases",
+  "notes": "浮层可拖动+字号 13.5px、扣费/余额颜色可在面板自选（即时预览、自动保存）、测浮层失败不再静默、版本行改为深黄「更新日志/点我更新」"
 }
